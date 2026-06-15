@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hobby Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0a0f0a;
+      --surface:   #111a11;
+      --surface2:  #1a261a;
+      --border:    #2a3d2a;
+      --accent:    #5cfc8a;
+      --accent2:   #a8fc5c;
+      --accentdim: #2afc5c44;
+      --text:      #e6f0e6;
+      --muted:     #7a8a7a;
+      --danger:    #fc5c5c;
+      --link:      #5cfca8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── AUTH ── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+
+    .auth-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .auth-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+    .auth-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0a0f0a;
+      font-weight: 700;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field select { cursor: pointer; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #0a0f0a;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .auth-msg {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    .auth-msg.error { color: var(--danger); }
+    .auth-msg.success { color: var(--accent); }
+
+    /* ── APP ── */
+    #app-screen { display: none; min-height: 100vh; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+
+    .user-email { font-size: 0.8rem; color: var(--muted); }
+
+    .btn-sm {
+      padding: 0.4rem 0.9rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-sm:hover { border-color: var(--danger); color: var(--danger); }
+
+    main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus { border-color: var(--accent); }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .filter-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.25rem;
+    }
+
+    .view-btn {
+      padding: 0.35rem 0.7rem;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active { background: var(--accent); color: #0a0f0a; }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #0a0f0a;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover { opacity: 0.85; }
+
+    /* ── CATEGORY GROUP VIEW ── */
+    .category-group { margin-bottom: 2.5rem; }
+
+    .category-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .category-count {
+      background: var(--accentdim);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.7rem;
+    }
+
+    /* ── CARDS ── */
+    .hobbies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+
+    .hobby-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: border-color 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .hobby-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .hobby-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .card-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.2rem;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .icon-btn.edit:hover { color: var(--accent); }
+    .icon-btn.delete:hover { color: var(--danger); }
+
+    .hobby-category-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .hobby-notes {
+      font-size: 0.875rem;
+      color: #b0c0b0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    /* ── LINKS SECTION ── */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .links-list { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    .link-item a {
+      color: var(--link);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
+    }
+
+    .link-item a:hover { text-decoration: underline; }
+
+    .link-label {
+      color: var(--text);
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    /* ── FILES SECTION ── */
+    .files-list { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .file-item a {
+      color: var(--accent2);
+      text-decoration: none;
+      font-size: 0.8rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
+    }
+
+    .file-item a:hover { text-decoration: underline; }
+
+    .file-delete {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0;
+      margin-left: auto;
+      transition: color 0.2s;
+    }
+
+    .file-delete:hover { color: var(--danger); }
+
+    /* ── EMPTY ── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state .big { font-size: 3rem; margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 560px;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── LINK BUILDER ── */
+    .link-builder { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+    .link-row { display: flex; gap: 0.5rem; align-items: center; }
+
+    .link-row input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .link-row input:focus { border-color: var(--accent); }
+    .link-row input.label-input { width: 35%; }
+    .link-row input.url-input { flex: 1; }
+
+    .btn-remove-link {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.2rem 0.4rem;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-remove-link:hover { color: var(--danger); }
+
+    .btn-add-link {
+      align-self: flex-start;
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-add-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── FILE UPLOAD ── */
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .file-drop:hover, .file-drop.dragover {
+      border-color: var(--accent);
+      background: var(--accentdim);
+    }
+
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-drop-text { font-size: 0.85rem; color: var(--muted); pointer-events: none; }
+    .file-drop-text span { color: var(--accent); font-weight: 600; }
+
+    .upload-queue { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }
+
+    .upload-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+    }
+
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 0.7rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+    .btn-save {
+      flex: 2;
+      padding: 0.7rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #0a0f0a;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-save:hover { opacity: 0.85; }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .save-status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.5rem;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 1rem; }
+      main { padding: 1rem; }
+      .user-email { display: none; }
+      .controls { flex-direction: column; }
+      .search-wrap { width: 100%; }
+      .link-row { flex-wrap: wrap; }
+      .link-row input.label-input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">// HOBBY TRACKER</div>
+    <div class="auth-sub">Your personal hobby hub</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Create Account</button>
+    </div>
+    <div class="field"><label>Email</label><input type="email" id="auth-email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="auth-password" placeholder="••••••••"/></div>
+    <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Sign In</button>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <header>
+    <div class="logo">// HOBBY TRACKER</div>
+    <div class="header-right">
+      <span class="user-email" id="user-email"></span>
+      <button class="btn-sm" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search-input" placeholder="Search hobbies, notes, links..." oninput="renderHobbies()"/>
+      </div>
+      <select class="filter-select" id="filter-category" onchange="renderHobbies()">
+        <option value="">All Categories</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-grouped" onclick="setView('grouped')" title="Group by category">⊞</button>
+        <button class="view-btn" id="view-flat" onclick="setView('flat')" title="Flat view">≡</button>
+      </div>
+      <button class="btn-add" onclick="openModal()">+ Add Hobby</button>
+    </div>
+
+    <div id="hobbies-container">
+      <div class="loading">Loading your hobbies...</div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add Hobby</div>
+
+    <div class="field">
+      <label>Hobby Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. FPV Drones, Lucid Dreaming, DJing"/>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <input type="text" id="f-category" placeholder="e.g. Outdoors, Tech, Music, Creative"/>
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="f-notes" placeholder="What's your current focus? Goals? Gear? Anything goes."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Resource Links</label>
+      <div class="link-builder" id="link-builder"></div>
+      <button class="btn-add-link" onclick="addLinkRow()">+ Add Link</button>
+    </div>
+
+    <div class="field">
+      <label>Upload Files</label>
+      <div class="file-drop" id="file-drop">
+        <input type="file" id="file-input" multiple onchange="handleFileSelect(this.files)"/>
+        <div class="file-drop-text">Drop files here or <span>browse</span><br/>Any file type accepted</div>
+      </div>
+      <div class="upload-queue" id="upload-queue"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="save-btn" onclick="saveHobby()">Save Hobby</button>
+    </div>
+    <div class="save-status" id="save-status"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+  const SUPABASE_URL = 'https://henswifxlvmtvywmvotl.supabase.co'
+  const SUPABASE_KEY = 'sb_publishable_vGAfwuAdUT5weIAgYzUTIA_bI9WmJL0'
+  const BUCKET = 'hobby-files'
+
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+  let hobbies = []
+  let editingId = null
+  let pendingFiles = []
+  let currentView = 'grouped'
+  let currentTab = 'login'
+
+  // ── AUTH ──
+  window.switchTab = (tab) => {
+    currentTab = tab
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'))
+    })
+    document.getElementById('auth-btn').textContent = tab === 'login' ? 'Sign In' : 'Create Account'
+    document.getElementById('auth-msg').textContent = ''
+  }
+
+  window.handleAuth = async () => {
+    const email = document.getElementById('auth-email').value.trim()
+    const password = document.getElementById('auth-password').value
+    const msg = document.getElementById('auth-msg')
+    const btn = document.getElementById('auth-btn')
+    if (!email || !password) { showAuthMsg('Fill in both fields.', true); return }
+    btn.disabled = true
+    btn.textContent = currentTab === 'login' ? 'Signing in...' : 'Creating account...'
+    let error
+    if (currentTab === 'login') {
+      ({ error } = await sb.auth.signInWithPassword({ email, password }))
+    } else {
+      ({ error } = await sb.auth.signUp({ email, password }))
+      if (!error) {
+        showAuthMsg('Account created! Check your email to confirm, then sign in.', false)
+        switchTab('login')
+        btn.disabled = false; btn.textContent = 'Sign In'; return
+      }
+    }
+    if (error) showAuthMsg(error.message, true)
+    btn.disabled = false
+    btn.textContent = currentTab === 'login' ? 'Sign In' : 'Create Account'
+  }
+
+  window.signOut = async () => {
+    await sb.auth.signOut()
+    document.getElementById('app-screen').style.display = 'none'
+    document.getElementById('auth-screen').style.display = 'flex'
+  }
+
+  function showAuthMsg(msg, isError) {
+    const el = document.getElementById('auth-msg')
+    el.textContent = msg
+    el.className = 'auth-msg ' + (isError ? 'error' : 'success')
+  }
+
+  // ── VIEW TOGGLE ──
+  window.setView = (v) => {
+    currentView = v
+    document.getElementById('view-grouped').classList.toggle('active', v === 'grouped')
+    document.getElementById('view-flat').classList.toggle('active', v === 'flat')
+    renderHobbies()
+  }
+
+  // ── LOAD & RENDER ──
+  async function loadHobbies() {
+    const { data, error } = await sb.from('hobbies').select('*').order('created_at', { ascending: false })
+    if (error) { console.error(error); return }
+
+    // generate signed URLs for all files (private bucket — URLs expire in 1 hour)
+    const raw = data || []
+    hobbies = await Promise.all(raw.map(async h => {
+      if (!h.files?.length) return h
+      const files = await Promise.all(h.files.map(async f => {
+        const { data: signed, error: signErr } = await sb.storage
+          .from(BUCKET)
+          .createSignedUrl(f.path, 3600)
+        return { ...f, url: signErr ? null : signed.signedUrl }
+      }))
+      return { ...h, files }
+    }))
+
+    updateCategoryFilter()
+    renderHobbies()
+  }
+
+  window.renderHobbies = () => {
+    const search = document.getElementById('search-input').value.toLowerCase()
+    const filterCat = document.getElementById('filter-category').value
+    const container = document.getElementById('hobbies-container')
+
+    let filtered = hobbies.filter(h => {
+      const matchSearch = !search ||
+        h.name?.toLowerCase().includes(search) ||
+        h.notes?.toLowerCase().includes(search) ||
+        h.category?.toLowerCase().includes(search) ||
+        (h.links || []).some(l => l.label?.toLowerCase().includes(search) || l.url?.toLowerCase().includes(search))
+      const matchCat = !filterCat || h.category === filterCat
+      return matchSearch && matchCat
+    })
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="hobbies-grid">
+          <div class="empty-state">
+            <div class="big">🎯</div>
+            <p>${hobbies.length === 0 ? "No hobbies yet. Add your first one!" : "Nothing matches your search."}</p>
+          </div>
+        </div>`
+      return
+    }
+
+    if (currentView === 'flat') {
+      container.innerHTML = `<div class="hobbies-grid">${filtered.map(cardHTML).join('')}</div>`
+      return
+    }
+
+    // grouped view
+    const groups = {}
+    filtered.forEach(h => {
+      const cat = h.category || 'Uncategorized'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(h)
+    })
+
+    container.innerHTML = Object.entries(groups).sort(([a],[b]) => a.localeCompare(b)).map(([cat, items]) => `
+      <div class="category-group">
+        <div class="category-label">
+          ${esc(cat)}
+          <span class="category-count">${items.length}</span>
+        </div>
+        <div class="hobbies-grid">${items.map(cardHTML).join('')}</div>
+      </div>`).join('')
+  }
+
+  function cardHTML(h) {
+    const links = (h.links || []).filter(l => l.url)
+    const files = (h.files || [])
+
+    return `
+      <div class="hobby-card">
+        <div class="card-top">
+          <div class="hobby-name">${esc(h.name)}</div>
+          <div class="card-actions">
+            <button class="icon-btn edit" onclick="openModal('${h.id}')" title="Edit">✎</button>
+            <button class="icon-btn delete" onclick="deleteHobby('${h.id}')" title="Delete">✕</button>
+          </div>
+        </div>
+        ${h.category ? `<span class="hobby-category-tag"># ${esc(h.category)}</span>` : ''}
+        ${h.notes ? `<div class="hobby-notes">${esc(h.notes)}</div>` : ''}
+        ${links.length ? `
+          <div>
+            <div class="section-label">Resources</div>
+            <div class="links-list">
+              ${links.map(l => `
+                <div class="link-item">
+                  ${l.label ? `<span class="link-label">${esc(l.label)}</span> →` : ''}
+                  <a href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.url)}">${shortUrl(l.url)}</a>
+                </div>`).join('')}
+            </div>
+          </div>` : ''}
+        ${files.filter(f => f.url).length ? `
+          <div>
+            <div class="section-label">Files</div>
+            <div class="files-list">
+              ${files.filter(f => f.url).map(f => `
+                <div class="file-item">
+                  📄 <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>
+                  <button class="file-delete" onclick="deleteFile('${h.id}', '${esc(f.path)}')" title="Remove file">✕</button>
+                </div>`).join('')}
+            </div>
+          </div>` : ''}
+      </div>`
+  }
+
+  function updateCategoryFilter() {
+    const cats = [...new Set(hobbies.map(h => h.category).filter(Boolean))].sort()
+    const sel = document.getElementById('filter-category')
+    const cur = sel.value
+    sel.innerHTML = '<option value="">All Categories</option>' +
+      cats.map(c => `<option ${c === cur ? 'selected' : ''}>${esc(c)}</option>`).join('')
+  }
+
+  // ── MODAL ──
+  window.openModal = async (id = null) => {
+    editingId = id
+    pendingFiles = []
+    document.getElementById('modal-title').textContent = id ? 'Edit Hobby' : 'Add Hobby'
+    document.getElementById('upload-queue').innerHTML = ''
+    document.getElementById('save-status').textContent = ''
+    document.getElementById('file-input').value = ''
+
+    if (id) {
+      const h = hobbies.find(x => x.id === id)
+      document.getElementById('f-name').value = h.name || ''
+      document.getElementById('f-category').value = h.category || ''
+      document.getElementById('f-notes').value = h.notes || ''
+      buildLinkRows(h.links || [])
+    } else {
+      document.getElementById('f-name').value = ''
+      document.getElementById('f-category').value = ''
+      document.getElementById('f-notes').value = ''
+      buildLinkRows([])
+    }
+
+    document.getElementById('modal').classList.add('open')
+  }
+
+  window.closeModal = () => {
+    document.getElementById('modal').classList.remove('open')
+    editingId = null
+    pendingFiles = []
+  }
+
+  // ── LINK ROWS ──
+  function buildLinkRows(links) {
+    const builder = document.getElementById('link-builder')
+    builder.innerHTML = ''
+    if (links.length === 0) { addLinkRow(); return }
+    links.forEach(l => addLinkRow(l.label, l.url))
+  }
+
+  window.addLinkRow = (label = '', url = '') => {
+    const builder = document.getElementById('link-builder')
+    const row = document.createElement('div')
+    row.className = 'link-row'
+    row.innerHTML = `
+      <input type="text" class="label-input" placeholder="Label (optional)" value="${esc(label)}"/>
+      <input type="url" class="url-input" placeholder="https://..." value="${esc(url)}"/>
+      <button class="btn-remove-link" onclick="this.parentElement.remove()" title="Remove">✕</button>`
+    builder.appendChild(row)
+  }
+
+  function getLinks() {
+    return [...document.querySelectorAll('#link-builder .link-row')].map(row => ({
+      label: row.querySelector('.label-input').value.trim(),
+      url: row.querySelector('.url-input').value.trim()
+    })).filter(l => l.url)
+  }
+
+  // ── FILE HANDLING ──
+  window.handleFileSelect = (files) => {
+    const queue = document.getElementById('upload-queue')
+    ;[...files].forEach(f => {
+      if (pendingFiles.find(p => p.name === f.name)) return
+      pendingFiles.push(f)
+      const item = document.createElement('div')
+      item.className = 'upload-item'
+      item.id = `queue-${f.name.replace(/\W/g,'_')}`
+      item.innerHTML = `<span>📎 ${esc(f.name)}</span><span>${(f.size/1024).toFixed(1)} KB</span>`
+      queue.appendChild(item)
+    })
+  }
+
+  const dropZone = document.getElementById('file-drop')
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover') })
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'))
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault()
+    dropZone.classList.remove('dragover')
+    handleFileSelect(e.dataTransfer.files)
+  })
+
+  // ── SAVE ──
+  window.saveHobby = async () => {
+    const name = document.getElementById('f-name').value.trim()
+    if (!name) { alert('Hobby name is required.'); return }
+
+    const btn = document.getElementById('save-btn')
+    const status = document.getElementById('save-status')
+    btn.disabled = true
+
+    const { data: { user } } = await sb.auth.getUser()
+
+    // upload any pending files
+    let existingFiles = []
+    if (editingId) {
+      const h = hobbies.find(x => x.id === editingId)
+      existingFiles = h?.files || []
+    }
+
+    const uploadedFiles = [...existingFiles]
+
+    if (pendingFiles.length > 0) {
+      status.textContent = `Uploading ${pendingFiles.length} file(s)...`
+      for (const file of pendingFiles) {
+        const path = `${user.id}/${Date.now()}_${file.name}`
+        const { error: upErr } = await sb.storage.from(BUCKET).upload(path, file)
+        if (upErr) { alert('Upload error: ' + upErr.message); btn.disabled = false; status.textContent = ''; return }
+        uploadedFiles.push({ name: file.name, path })
+      }
+    }
+
+    status.textContent = 'Saving...'
+
+    const payload = {
+      name,
+      category: document.getElementById('f-category').value.trim() || null,
+      notes: document.getElementById('f-notes').value.trim() || null,
+      links: getLinks(),
+      files: uploadedFiles,
+      user_id: user.id
+    }
+
+    let error
+    if (editingId) {
+      ({ error } = await sb.from('hobbies').update(payload).eq('id', editingId))
+    } else {
+      ({ error } = await sb.from('hobbies').insert(payload))
+    }
+
+    btn.disabled = false
+    status.textContent = ''
+
+    if (error) { alert('Error saving: ' + error.message); return }
+
+    closeModal()
+    await loadHobbies()
+  }
+
+  // ── DELETE HOBBY ──
+  window.deleteHobby = async (id) => {
+    if (!confirm('Delete this hobby and all its files?')) return
+    const h = hobbies.find(x => x.id === id)
+    if (h?.files?.length) {
+      const paths = h.files.map(f => f.path)
+      await sb.storage.from(BUCKET).remove(paths)
+    }
+    const { error } = await sb.from('hobbies').delete().eq('id', id)
+    if (error) { alert('Error deleting: ' + error.message); return }
+    await loadHobbies()
+  }
+
+  // ── DELETE FILE FROM HOBBY ──
+  window.deleteFile = async (hobbyId, filePath) => {
+    if (!confirm('Remove this file?')) return
+    await sb.storage.from(BUCKET).remove([filePath])
+    const h = hobbies.find(x => x.id === hobbyId)
+    const updatedFiles = (h.files || []).filter(f => f.path !== filePath)
+    const { error } = await sb.from('hobbies').update({ files: updatedFiles }).eq('id', hobbyId)
+    if (error) { alert('Error removing file: ' + error.message); return }
+    await loadHobbies()
+  }
+
+  // ── UTILS ──
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+  }
+
+  function shortUrl(url) {
+    try { return new URL(url).hostname } catch { return url }
+  }
+
+  // ── INIT ──
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      document.getElementById('user-email').textContent = session.user.email
+      document.getElementById('auth-screen').style.display = 'none'
+      document.getElementById('app-screen').style.display = 'block'
+      await loadHobbies()
+    } else {
+      document.getElementById('auth-screen').style.display = 'flex'
+      document.getElementById('app-screen').style.display = 'none'
+    }
+  })
+
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal()
+  })
+
+  document.getElementById('auth-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.handleAuth()
+  })
+</script>
+</body>
+</html>
