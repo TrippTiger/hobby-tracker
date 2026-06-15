@@ -996,53 +996,62 @@
     const btn = document.getElementById('save-btn')
     const status = document.getElementById('save-status')
     btn.disabled = true
+    status.textContent = 'Working...'
 
-    const { data: { user } } = await sb.auth.getUser()
+    try {
+      const { data: userData, error: userErr } = await sb.auth.getUser()
+      if (userErr || !userData?.user) throw new Error('Not authenticated: ' + (userErr?.message || 'no user'))
+      const user = userData.user
 
-    // upload any pending files
-    let existingFiles = []
-    if (editingId) {
-      const h = hobbies.find(x => x.id === editingId)
-      existingFiles = h?.files || []
-    }
-
-    const uploadedFiles = [...existingFiles]
-
-    if (pendingFiles.length > 0) {
-      status.textContent = `Uploading ${pendingFiles.length} file(s)...`
-      for (const file of pendingFiles) {
-        const path = `${user.id}/${Date.now()}_${file.name}`
-        const { error: upErr } = await sb.storage.from(BUCKET).upload(path, file)
-        if (upErr) { alert('Upload error: ' + upErr.message); btn.disabled = false; status.textContent = ''; return }
-        uploadedFiles.push({ name: file.name, path })
+      // upload any pending files
+      let existingFiles = []
+      if (editingId) {
+        const h = hobbies.find(x => x.id === editingId)
+        existingFiles = h?.files || []
       }
+
+      const uploadedFiles = [...existingFiles]
+
+      if (pendingFiles.length > 0) {
+        status.textContent = `Uploading ${pendingFiles.length} file(s)...`
+        for (const file of pendingFiles) {
+          const path = `${user.id}/${Date.now()}_${file.name}`
+          const { error: upErr } = await sb.storage.from(BUCKET).upload(path, file)
+          if (upErr) throw new Error('Upload error: ' + upErr.message)
+          uploadedFiles.push({ name: file.name, path })
+        }
+      }
+
+      status.textContent = 'Saving...'
+
+      const payload = {
+        name,
+        category: document.getElementById('f-category').value.trim() || null,
+        notes: document.getElementById('f-notes').value.trim() || null,
+        links: getLinks(),
+        files: uploadedFiles,
+        user_id: user.id
+      }
+
+      let dbError
+      if (editingId) {
+        ({ error: dbError } = await sb.from('hobbies').update(payload).eq('id', editingId))
+      } else {
+        ({ error: dbError } = await sb.from('hobbies').insert(payload))
+      }
+
+      if (dbError) throw new Error('DB error: ' + dbError.message)
+
+      closeModal()
+      await loadHobbies()
+
+    } catch (err) {
+      console.error('saveHobby error:', err)
+      alert('Error: ' + err.message)
+    } finally {
+      btn.disabled = false
+      status.textContent = ''
     }
-
-    status.textContent = 'Saving...'
-
-    const payload = {
-      name,
-      category: document.getElementById('f-category').value.trim() || null,
-      notes: document.getElementById('f-notes').value.trim() || null,
-      links: getLinks(),
-      files: uploadedFiles,
-      user_id: user.id
-    }
-
-    let error
-    if (editingId) {
-      ({ error } = await sb.from('hobbies').update(payload).eq('id', editingId))
-    } else {
-      ({ error } = await sb.from('hobbies').insert(payload))
-    }
-
-    btn.disabled = false
-    status.textContent = ''
-
-    if (error) { alert('Error saving: ' + error.message); return }
-
-    closeModal()
-    await loadHobbies()
   }
 
   // ── DELETE HOBBY ──
