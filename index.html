@@ -727,7 +727,9 @@
   const SUPABASE_KEY = 'sb_publishable_vGAfwuAdUT5weIAgYzUTIA_bI9WmJL0'
   const BUCKET = 'hobby-files'
 
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { storageKey: 'hobby-tracker-auth' }
+})
 
   let hobbies = []
   let editingId = null
